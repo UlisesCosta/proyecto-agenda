@@ -1,0 +1,7 @@
+# Credenciales de la base de datos: nunca subir al repositorio público
+.env
+
+# Archivos de sistema
+Thumbs.db
+.DS_Store
+.atl/ 
