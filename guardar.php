@@ -15,13 +15,22 @@ $campos = ['nombre', 'apellido', 'telefono', 'email', 'direccion', 'notas'];
 $datos = [];
 foreach ($campos as $campo) {
     $valor = $_POST[$campo] ?? '';
-    $datos[$campo] = is_scalar($valor) ? trim((string) $valor) : '';
+    $datos[$campo] = is_scalar($valor)
+        ? ($campo === 'telefono' ? (string) $valor : trim((string) $valor))
+        : '';
 }
 
-$errores = validarContacto($datos);
-if ($datos['telefono'] !== '' && !preg_match('/^\+?[0-9\s().-]{7,20}$/', $datos['telefono'])) {
-    $errores['telefono'] = 'Ingresa un teléfono válido.';
+$errores = [];
+$telefonoIngresado = $datos['telefono'];
+if (!preg_match('/\A[0-9 ]*\z/', $telefonoIngresado)) {
+    $errores['telefono'] = 'El teléfono solo puede contener dígitos y espacios.';
+} else {
+    $datos['telefono'] = str_replace(' ', '', $telefonoIngresado);
+    if ($datos['telefono'] !== '' && strlen($datos['telefono']) !== 10) {
+        $errores['telefono'] = 'El teléfono debe tener exactamente 10 dígitos.';
+    }
 }
+$errores = array_merge(validarContacto($datos), $errores);
 
 $archivoFoto = $_FILES['foto'] ?? [];
 $usarFotoPredeterminada = false;
@@ -47,7 +56,11 @@ if (!empty($errores)) {
 }
 
 try {
-    $stmt = $pdo->prepare('SELECT 1 FROM contactos WHERE telefono = :telefono LIMIT 1');
+    $stmt = $pdo->prepare(
+        "SELECT 1 FROM contactos
+         WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(telefono, ' ', ''), '-', ''), '(', ''), ')', ''), '.', ''), '+', '') = :telefono
+         LIMIT 1"
+    );
     $stmt->execute([':telefono' => $datos['telefono']]);
 
     if ($stmt->fetchColumn() !== false) {

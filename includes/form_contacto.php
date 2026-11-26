@@ -50,7 +50,9 @@ foreach ($campos as $campo) {
     </p>
     <p>
         <label for="telefono">Teléfono</label><br>
-        <input id="telefono" name="telefono" type="tel" maxlength="20" required
+        <input id="telefono" name="telefono" type="tel" maxlength="12" pattern="[0-9 ]{10,12}"
+               title="Ingresa 10 dígitos; puedes separarlos con espacios, por ejemplo 000 000 0000."
+               placeholder="000 000 0000" required
                value="<?php echo e($valores['telefono']); ?>">
     </p>
     <p>
