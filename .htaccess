@@ -1,0 +1,12 @@
+# ============================================================
+# Seguridad básica del proyecto
+# ============================================================
+
+# Bloquear el acceso web a archivos ocultos (como .env),
+# que contienen credenciales sensibles de la base de datos.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Evitar el listado de directorios
+Options -Indexes
