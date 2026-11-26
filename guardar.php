@@ -46,6 +46,24 @@ if (!empty($errores)) {
     exit;
 }
 
+try {
+    $stmt = $pdo->prepare('SELECT 1 FROM contactos WHERE telefono = :telefono LIMIT 1');
+    $stmt->execute([':telefono' => $datos['telefono']]);
+
+    if ($stmt->fetchColumn() !== false) {
+        $_SESSION['errores'] = ['telefono' => 'Este número de teléfono ya está registrado.'];
+        $_SESSION['old'] = $datos;
+        header('Location: crear.php');
+        exit;
+    }
+} catch (PDOException $e) {
+    error_log('Error al verificar teléfono duplicado: ' . $e->getMessage());
+    $_SESSION['errores'] = ['_general' => 'No se pudo validar el contacto. Inténtalo más tarde.'];
+    $_SESSION['old'] = $datos;
+    header('Location: crear.php');
+    exit;
+}
+
 $nombreFoto = FOTO_POR_DEFECTO;
 if (!$usarFotoPredeterminada) {
     $nombreFoto = subirFoto($archivoFoto);
