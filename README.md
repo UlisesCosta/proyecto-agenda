@@ -13,11 +13,13 @@ MySQL, sin frameworks ni dependencias externas.
 ## Funcionalidades
 
 - Listar contactos
+- Buscar contactos por nombre, apellido, teléfono o email
 - Crear un contacto con foto
 - Ver el detalle de un contacto
 - Editar un contacto
 - Eliminar un contacto (y su foto)
 - Validación de datos y subida segura de imágenes (JPG, PNG y WebP, hasta 2 MB)
+- Protección CSRF en los formularios que envían datos
 
 ## Estructura del proyecto
 
@@ -31,6 +33,7 @@ MySQL, sin frameworks ni dependencias externas.
 │   ├── header.php
 │   ├── menu.php
 │   ├── footer.php
+│   ├── form_contacto.php
 │   └── funciones.php
 ├── css/
 │   └── styles.css
@@ -55,18 +58,11 @@ MySQL, sin frameworks ni dependencias externas.
 4. Copia el proyecto a la carpeta pública del servidor (por ejemplo `htdocs`).
 5. Abre `http://localhost/proyecto-agenda/` en tu navegador.
 
-## Instalación en hosting (InfinityFree u otro gratuito)
-
-1. Sube todos los archivos por FTP o con el administrador de archivos del hosting.
-   Asegúrate de que la carpeta `archivos/` tenga permisos de escritura.
-2. Crea la base de datos y el usuario desde el panel de control del hosting
-   (en InfinityFree: "MySQL Databases").
-3. Completa `.env` con los datos que te da el hosting. El host NO suele ser
-   `localhost`: usa el que indique el panel (por ejemplo
-   `sqlXXX.infinityfree.com`).
-4. Verifica que `.env` no quede en el repositorio (está en `.gitignore`).
 
 ## Base de datos
+
+El esquema completo está en `db_schema.sql`: crea la base `agenda_contactos` y
+la tabla `contactos`. Se puede ejecutar desde phpMyAdmin o la consola de MySQL.
 
 Tabla `contactos`:
 
@@ -83,10 +79,10 @@ Tabla `contactos`:
 
 ## Integrantes
 
-- _(Nombre)_
-- _(Nombre)_
-- _(Nombre)_
+- Ulises Hernandez Costa
+- Fredy De la Cruz Gomez
+- Ernesto Gonzalez Perez
 
 ## Materia
 
-- _(Nombre de la materia)_
+- Programación Web
