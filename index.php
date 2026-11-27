@@ -6,21 +6,60 @@
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/includes/funciones.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Mensajes de sesión: éxito (mensaje) y error (error)
+$mensaje = $_SESSION['mensaje'] ?? '';
+$flashError = $_SESSION['error'] ?? '';
+unset($_SESSION['mensaje'], $_SESSION['error']);
+$mensaje = is_string($mensaje) ? $mensaje : '';
+$flashError = is_string($flashError) ? $flashError : '';
+
 $titulo = 'Contactos';
 
-// Obtener todos los contactos ordenados por apellido y nombre.
-// Esta consulta no recibe datos del usuario, por eso usa query() sin
-// parámetros. Las sentencias preparadas (prepare/execute) se usan en las
-// páginas que reciben datos: guardar.php, actualizar.php y eliminar.php.
+// Búsqueda por nombre, apellido, teléfono o email.
+// La consulta usa prepare/execute porque ahora recibe un parámetro.
+$busqueda = trim((string) ($_GET['q'] ?? ''));
+if (mb_strlen($busqueda) > 80) {
+    $busqueda = mb_substr($busqueda, 0, 80);
+}
+
 $contactos = [];
 $error = false;
 
 try {
-    $stmt = $pdo->query('SELECT * FROM contactos ORDER BY apellido, nombre');
+    $sql = 'SELECT * FROM contactos';
+    $parametros = [];
+
+    if ($busqueda !== '') {
+        $sql .= ' WHERE nombre LIKE ?
+                     OR apellido LIKE ?
+                     OR telefono LIKE ?
+                     OR email LIKE ?';
+        $parametros = array_fill(0, 4, '%' . $busqueda . '%');
+    }
+
+    $sql .= ' ORDER BY apellido, nombre';
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
     $contactos = $stmt->fetchAll();
 } catch (PDOException $e) {
     error_log('Error al listar contactos: ' . $e->getMessage());
     $error = true;
+}
+
+$totalContactos = count($contactos);
+if ($busqueda === '') {
+    $descripcion = $totalContactos === 1
+        ? '1 contacto en tu agenda'
+        : $totalContactos . ' contactos en tu agenda';
+} else {
+    $descripcion = $totalContactos === 1
+        ? '1 resultado para «' . $busqueda . '»'
+        : $totalContactos . ' resultados para «' . $busqueda . '»';
 }
 
 require_once __DIR__ . '/includes/header.php';
@@ -30,21 +69,52 @@ require_once __DIR__ . '/includes/header.php';
     <header class="page-header">
         <div>
             <h1 class="page-title">Contactos</h1>
-            <p class="page-description"><?php echo count($contactos); ?> contactos en tu agenda</p>
+            <p class="page-description"><?php echo e($descripcion); ?></p>
         </div>
         <a href="crear.php" class="btn btn-primary">Nuevo contacto</a>
     </header>
+
+    <?php if ($mensaje !== ''): ?>
+        <div class="alert alert-success" role="status">
+            <?php echo e($mensaje); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($flashError !== ''): ?>
+        <div class="alert" role="alert">
+            <?php echo e($flashError); ?>
+        </div>
+    <?php endif; ?>
+
+    <form class="buscador" method="get" action="index.php" role="search">
+        <label class="sr-only" for="busqueda">Buscar contactos</label>
+        <input class="form-control" id="busqueda" name="q" type="search" maxlength="80"
+               placeholder="Buscar por nombre, teléfono o email"
+               value="<?php echo e($busqueda); ?>">
+        <button class="btn btn-ghost" type="submit">Buscar</button>
+        <?php if ($busqueda !== ''): ?>
+            <a class="btn btn-ghost" href="index.php">Limpiar</a>
+        <?php endif; ?>
+    </form>
 
     <?php if ($error): ?>
         <div class="alert" role="alert">
             No se pudo cargar la lista de contactos. Inténtalo más tarde.
         </div>
     <?php elseif (empty($contactos)): ?>
-        <div class="empty-state">
-            <h2>No hay contactos todavía</h2>
-            <p>Agrega tu primer contacto para empezar.</p>
-            <a href="crear.php" class="btn btn-primary">Agregar contacto</a>
-        </div>
+        <?php if ($busqueda !== ''): ?>
+            <div class="empty-state">
+                <h2>Sin resultados</h2>
+                <p>No se encontraron contactos para «<?php echo e($busqueda); ?>».</p>
+                <a href="index.php" class="btn btn-ghost">Ver todos los contactos</a>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <h2>No hay contactos todavía</h2>
+                <p>Agrega tu primer contacto para empezar.</p>
+                <a href="crear.php" class="btn btn-primary">Agregar contacto</a>
+            </div>
+        <?php endif; ?>
     <?php else: ?>
         <div class="lista-contactos">
             <?php foreach ($contactos as $contacto): ?>
@@ -76,8 +146,7 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="contacto-acciones">
                         <a class="accion" href="editar.php?id=<?php echo (int) $contacto['id']; ?>">Editar</a>
                         <a class="accion accion-peligro"
-                           href="eliminar.php?id=<?php echo (int) $contacto['id']; ?>"
-                           onclick="return confirm('¿Seguro que quieres eliminar este contacto?');">Eliminar</a>
+                           href="eliminar.php?id=<?php echo (int) $contacto['id']; ?>">Eliminar</a>
                     </div>
                 </article>
             <?php endforeach; ?>
