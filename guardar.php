@@ -11,6 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/includes/funciones.php';
 
+if (!csrfValidar($_POST['csrf_token'] ?? '')) {
+    $_SESSION['errores'] = ['_general' => 'Tu sesión expiró. Vuelve a intentarlo.'];
+    header('Location: crear.php');
+    exit;
+}
+
 $campos = ['nombre', 'apellido', 'telefono', 'email', 'direccion', 'notas'];
 $datos = [];
 foreach ($campos as $campo) {
@@ -20,17 +26,13 @@ foreach ($campos as $campo) {
         : '';
 }
 
-$errores = [];
-$telefonoIngresado = $datos['telefono'];
-if (!preg_match('/\A[0-9 ]*\z/', $telefonoIngresado)) {
-    $errores['telefono'] = 'El teléfono solo puede contener dígitos y espacios.';
-} else {
-    $datos['telefono'] = str_replace(' ', '', $telefonoIngresado);
-    if ($datos['telefono'] !== '' && strlen($datos['telefono']) !== 10) {
-        $errores['telefono'] = 'El teléfono debe tener exactamente 10 dígitos.';
-    }
+$resultadoTelefono = validarTelefono($datos['telefono']);
+$datos['telefono'] = $resultadoTelefono['telefono'];
+
+$errores = validarContacto($datos);
+if ($resultadoTelefono['error'] !== null) {
+    $errores['telefono'] = $resultadoTelefono['error'];
 }
-$errores = array_merge(validarContacto($datos), $errores);
 
 $archivoFoto = $_FILES['foto'] ?? [];
 $usarFotoPredeterminada = false;

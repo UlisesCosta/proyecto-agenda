@@ -11,11 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/includes/funciones.php';
 
+if (!csrfValidar($_POST['csrf_token'] ?? '')) {
+    $_SESSION['error'] = 'Tu sesión expiró. Vuelve a intentarlo.';
+    header('Location: index.php');
+    exit;
+}
+
 $idRecibido = $_POST['id'] ?? null;
 $id = is_scalar($idRecibido) ? filter_var($idRecibido, FILTER_VALIDATE_INT) : false;
 
 if ($id === false || $id < 1) {
-    $_SESSION['errores'] = ['_general' => 'No se pudo actualizar el contacto.'];
+    $_SESSION['error'] = 'No se pudo actualizar el contacto.';
     header('Location: index.php');
     exit;
 }
@@ -26,13 +32,13 @@ try {
     $contacto = $stmt->fetch();
 } catch (PDOException $e) {
     error_log('Error al buscar contacto para actualizar: ' . $e->getMessage());
-    $_SESSION['errores'] = ['_general' => 'No se pudo actualizar el contacto. Inténtalo más tarde.'];
+    $_SESSION['error'] = 'No se pudo actualizar el contacto. Inténtalo más tarde.';
     header('Location: index.php');
     exit;
 }
 
 if (!$contacto) {
-    $_SESSION['errores'] = ['_general' => 'No se encontró el contacto que quieres actualizar.'];
+    $_SESSION['error'] = 'No se encontró el contacto que quieres actualizar.';
     header('Location: index.php');
     exit;
 }
@@ -44,15 +50,21 @@ foreach ($campos as $campo) {
     $datos[$campo] = is_scalar($valor) ? trim((string) $valor) : '';
 }
 
+$resultadoTelefono = validarTelefono($datos['telefono']);
+$datos['telefono'] = $resultadoTelefono['telefono'];
+
 $errores = validarContacto($datos);
-if ($datos['telefono'] !== '' && !preg_match('/^\+?[0-9\s().-]{7,20}$/', $datos['telefono'])) {
-    $errores['telefono'] = 'Ingresa un teléfono válido.';
+if ($resultadoTelefono['error'] !== null) {
+    $errores['telefono'] = $resultadoTelefono['error'];
 }
 
 if (empty($errores)) {
     try {
         $stmt = $pdo->prepare(
-            'SELECT 1 FROM contactos WHERE telefono = :telefono AND id <> :id LIMIT 1'
+            "SELECT 1 FROM contactos
+             WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(telefono, ' ', ''), '-', ''), '(', ''), ')', ''), '.', ''), '+', '') = :telefono
+             AND id <> :id
+             LIMIT 1"
         );
         $stmt->execute([
             ':telefono' => $datos['telefono'],

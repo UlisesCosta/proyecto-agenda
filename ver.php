@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
 if ($id === false || $id === null || $id < 1) {
-    $_SESSION['mensaje'] = 'El contacto solicitado no existe.';
+    $_SESSION['error'] = 'El contacto solicitado no existe.';
     header('Location: index.php');
     exit;
 }
@@ -19,13 +19,13 @@ try {
     $contacto = $stmt->fetch();
 } catch (PDOException $e) {
     error_log('Error al consultar contacto: ' . $e->getMessage());
-    $_SESSION['mensaje'] = 'No se pudo cargar el contacto. Inténtalo más tarde.';
+    $_SESSION['error'] = 'No se pudo cargar el contacto. Inténtalo más tarde.';
     header('Location: index.php');
     exit;
 }
 
 if (!$contacto) {
-    $_SESSION['mensaje'] = 'El contacto solicitado no existe.';
+    $_SESSION['error'] = 'El contacto solicitado no existe.';
     header('Location: index.php');
     exit;
 }
@@ -47,25 +47,33 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </header>
 
-    <article class="contacto">
-        <img class="contacto-foto"
+    <article class="detalle">
+        <img class="detalle-foto"
              src="archivos/<?php echo e($foto); ?>"
              alt="Foto de <?php echo e($nombreCompleto); ?>">
-        <div class="contacto-info">
-            <span class="contacto-detalle"><?php echo e($contacto['telefono']); ?></span>
+
+        <div class="detalle-info">
+            <div class="detalle-campo">
+                <span class="detalle-etiqueta">Teléfono</span>
+                <span class="detalle-valor"><?php echo e($contacto['telefono']); ?></span>
+            </div>
+
             <?php foreach (['email' => 'Email', 'direccion' => 'Dirección', 'notas' => 'Notas'] as $campo => $etiqueta): ?>
                 <?php if (trim((string) ($contacto[$campo] ?? '')) !== ''): ?>
-                    <span class="contacto-detalle"><?php echo e($etiqueta); ?>: <?php echo e($contacto[$campo]); ?></span>
+                    <div class="detalle-campo">
+                        <span class="detalle-etiqueta"><?php echo e($etiqueta); ?></span>
+                        <span class="detalle-valor"><?php echo e($contacto[$campo]); ?></span>
+                    </div>
                 <?php endif; ?>
             <?php endforeach; ?>
         </div>
     </article>
 
-    <p class="contacto-acciones">
+    <div class="detalle-acciones">
         <a class="btn btn-primary" href="editar.php?id=<?php echo (int) $contacto['id']; ?>">Editar</a>
-        <a class="accion accion-peligro" href="eliminar.php?id=<?php echo (int) $contacto['id']; ?>">Eliminar</a>
+        <a class="btn btn-danger" href="eliminar.php?id=<?php echo (int) $contacto['id']; ?>">Eliminar</a>
         <a class="btn btn-ghost" href="index.php">Volver al listado</a>
-    </p>
+    </div>
 </main>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

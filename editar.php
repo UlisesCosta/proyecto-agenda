@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $idRecibido = $_GET['id'] ?? null;
 $id = is_scalar($idRecibido) ? filter_var($idRecibido, FILTER_VALIDATE_INT) : false;
 if ($id === false || $id < 1) {
-    $_SESSION['mensaje'] = 'El contacto solicitado no existe.';
+    $_SESSION['error'] = 'El contacto solicitado no existe.';
     header('Location: index.php');
     exit;
 }
@@ -20,13 +20,13 @@ try {
     $contacto = $stmt->fetch();
 } catch (PDOException $e) {
     error_log('Error al buscar contacto para editar: ' . $e->getMessage());
-    $_SESSION['mensaje'] = 'No se pudo cargar el contacto. Inténtalo más tarde.';
+    $_SESSION['error'] = 'No se pudo cargar el contacto. Inténtalo más tarde.';
     header('Location: index.php');
     exit;
 }
 
 if (!$contacto) {
-    $_SESSION['mensaje'] = 'El contacto solicitado no existe.';
+    $_SESSION['error'] = 'El contacto solicitado no existe.';
     header('Location: index.php');
     exit;
 }
