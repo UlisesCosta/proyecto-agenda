@@ -24,6 +24,84 @@ function e($texto) {
 }
 
 /**
+ * Devuelve el token CSRF de la sesión, generándolo si todavía no existe.
+ *
+ * @return string Token en formato hexadecimal.
+ */
+function csrfToken() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Devuelve el campo oculto con el token CSRF para incluir en un formulario.
+ *
+ * @return string HTML del input oculto.
+ */
+function csrfCampo() {
+    return '<input type="hidden" name="csrf_token" value="' . e(csrfToken()) . '">';
+}
+
+/**
+ * Valida un token CSRF recibido por POST.
+ *
+ * @param mixed $token Valor enviado en el campo csrf_token.
+ * @return bool true si el token coincide con el de la sesión.
+ */
+function csrfValidar($token) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $esperado = $_SESSION['csrf_token'] ?? '';
+
+    return is_string($token)
+        && is_string($esperado)
+        && $esperado !== ''
+        && hash_equals($esperado, $token);
+}
+
+/**
+ * Normaliza y valida un teléfono.
+ *
+ * Reglas (iguales para crear y editar):
+ *   - Solo dígitos y espacios.
+ *   - Exactamente 10 dígitos, sin contar los espacios.
+ *
+ * @param string $telefono Valor recibido del formulario.
+ * @return array{telefono: string, error: string|null} Teléfono normalizado
+ *         (solo dígitos) y mensaje de error, o null si es válido.
+ */
+function validarTelefono($telefono) {
+    $texto = trim((string) $telefono);
+
+    if (!preg_match('/\A[0-9 ]*\z/', $texto)) {
+        return [
+            'telefono' => $texto,
+            'error' => 'El teléfono solo puede contener dígitos y espacios.',
+        ];
+    }
+
+    $normalizado = str_replace(' ', '', $texto);
+
+    if (strlen($normalizado) !== 10) {
+        return [
+            'telefono' => $normalizado,
+            'error' => 'El teléfono debe tener exactamente 10 dígitos.',
+        ];
+    }
+
+    return ['telefono' => $normalizado, 'error' => null];
+}
+
+/**
  * Valida los datos de un contacto recibidos por POST.
  *
  * Longitudes máximas según la tabla `contactos`:
