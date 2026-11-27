@@ -67,6 +67,19 @@ button {
   outline-offset: 2px;
 }
 
+/* Contenido oculto visualmente pero disponible para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- Contenedor ---------- */
 .container {
   width: 100%;
@@ -152,6 +165,15 @@ button {
   background-color: var(--muted);
 }
 
+.btn-danger {
+  background-color: var(--danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
 /* ---------- Encabezado de página ---------- */
 .page-header {
   display: flex;
@@ -172,6 +194,24 @@ button {
   margin: 0.25rem 0 0;
   font-size: 0.9375rem;
   color: var(--muted-foreground);
+}
+
+/* ---------- Buscador ---------- */
+.buscador {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  max-width: 620px;
+  margin-bottom: 1.5rem;
+}
+
+.buscador .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.buscador .btn {
+  flex-shrink: 0;
 }
 
 /* ---------- Lista de contactos ---------- */
@@ -282,6 +322,214 @@ button {
   font-size: 0.875rem;
 }
 
+.alert p {
+  margin: 0;
+}
+
+.alert p + p {
+  margin-top: 0.25rem;
+}
+
+.alert-success {
+  border-color: #bbf7d0;
+  background-color: #f0fdf4;
+  color: #166534;
+}
+
+/* ---------- Formularios ---------- */
+.formulario {
+  max-width: 640px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-required {
+  color: var(--primary);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control::placeholder {
+  color: #a1a1aa;
+}
+
+.form-control:hover {
+  border-color: #d4d4d8;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+textarea.form-control {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+input[type="file"].form-control {
+  padding: 0.375rem;
+  font-size: 0.875rem;
+}
+
+input[type="file"].form-control::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background-color: var(--muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+input[type="file"].form-control::file-selector-button:hover {
+  background-color: #e4e4e7;
+}
+
+.form-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Foto actual mostrada al editar */
+.foto-actual {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.foto-actual img {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  object-fit: cover;
+  background-color: var(--muted);
+}
+
+.foto-actual span {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+/* ---------- Detalle del contacto ---------- */
+.detalle {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  max-width: 720px;
+  padding-block: 1.5rem 0;
+}
+
+.detalle-foto {
+  width: 9rem;
+  height: 9rem;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background-color: var(--muted);
+}
+
+.detalle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.detalle-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.detalle-etiqueta {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.detalle-valor {
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.detalle-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 720px;
+  margin-top: 2rem;
+}
+
+/* ---------- Confirmación de eliminación ---------- */
+.confirmacion {
+  max-width: 480px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.confirmacion p {
+  margin: 0 0 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+}
+
+.confirmacion-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 /* ---------- Pie de página ---------- */
 .footer {
   margin-top: 4rem;
@@ -293,6 +541,16 @@ button {
 
 .footer p {
   margin: 0;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.footer-meta {
+  font-size: 0.8125rem;
 }
 
 /* ---------- Responsive ---------- */
@@ -309,5 +567,27 @@ button {
 
   .contacto-acciones {
     margin-left: 3.75rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detalle {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .detalle-foto {
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .buscador {
+    flex-wrap: wrap;
+  }
+
+  .buscador .form-control {
+    flex-basis: 100%;
   }
 }

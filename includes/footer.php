@@ -7,8 +7,9 @@
  */
 ?>
     <footer class="footer">
-        <div class="container">
+        <div class="container footer-inner">
             <p>&copy; <?php echo date('Y'); ?> Agenda de Contactos</p>
+            <p class="footer-meta">Programación Web · Ulises Hernandez Costa · Fredy De la Cruz Gomez · Ernesto Gonzalez Perez</p>
         </div>
     </footer>
 </body>
