@@ -1,4 +1,10 @@
-CREATE DATABASE IF NOT EXISTS x ;
+-- Esquema de la base de datos de la agenda.
+-- Si el hosting ya creó la base, se puede omitir la línea CREATE DATABASE
+-- y ejecutar solo la tabla.
+
+CREATE DATABASE IF NOT EXISTS agenda_contactos
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 
 USE agenda_contactos;
 
